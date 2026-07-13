@@ -38,20 +38,24 @@ app.post("/visitor", (req, res) => {
   const { sessionId, email } = req.body;
 
   const existingVisitor = visitors.find(
-    (visitor) => visitor.sessionId === sessionId
+    (visitor) => visitor.email === email
   );
 
   if (existingVisitor) {
-    existingVisitor.email = email;
-  } else {
-    visitors.push({
-      sessionId,
-      email,
+    return res.json({
+      success: true,
+      sessionId: existingVisitor.sessionId,
     });
   }
 
+  visitors.push({
+    sessionId,
+    email,
+  });
+
   res.json({
     success: true,
+    sessionId,
   });
 });
 
