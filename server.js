@@ -13,6 +13,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 
 const messages = [];
+const visitors = [];
 
 
 app.get("/session", (req, res) => {
@@ -33,11 +34,36 @@ app.get("/session", (req, res) => {
 });
 
 
+app.post("/visitor", (req, res) => {
+  const { sessionId, email } = req.body;
+
+  const existingVisitor = visitors.find(
+    (visitor) => visitor.sessionId === sessionId
+  );
+
+  if (existingVisitor) {
+    existingVisitor.email = email;
+  } else {
+    visitors.push({
+      sessionId,
+      email,
+    });
+  }
+
+  res.json({
+    success: true,
+  });
+});
+
+
 /*
   GET /session
 */
 app.get("/sessions", (req, res) => {
-  const sessions = [...new Set(messages.map((m) => m.sessionId))];
+  const sessions = visitors.map((visitor) => ({
+    sessionId: visitor.sessionId,
+    email: visitor.email,
+  }));
 
   res.json({
     success: true,
