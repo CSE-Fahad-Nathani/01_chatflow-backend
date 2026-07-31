@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// const PORT = 5000;
+const PROD = process.env.PROD === "true";
 const PORT = process.env.PORT || 5000;
 
 const messages = [];
@@ -27,7 +27,7 @@ app.get("/session", (req, res) => {
     sessionId: sessionId || `sess_${Date.now()}`,
     visitorId: `visitor_${Math.floor(Math.random() * 100000)}`,
     config: {
-      title: "Infomanav Support",
+      title: "Fahad Custom Chatbot Script",
       primaryColor: "#2563eb",
     },
   });
@@ -131,6 +131,34 @@ app.post("/reply", (req, res) => {
   });
 });
 
+app.delete("/sessions/:sessionId", (req, res) => {
+  const { sessionId } = req.params;
+
+  const visitorIndex = visitors.findIndex(
+    (visitor) => visitor.sessionId === sessionId
+  );
+
+  if (visitorIndex === -1) {
+    return res.status(404).json({
+      success: false,
+      error: "Session not found",
+    });
+  }
+
+  visitors.splice(visitorIndex, 1);
+
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].sessionId === sessionId) {
+      messages.splice(i, 1);
+    }
+  }
+
+  res.json({
+    success: true,
+    sessionId,
+  });
+});
+
 
 
 
@@ -139,5 +167,7 @@ app.post("/reply", (req, res) => {
 
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(
+    `🚀 Server running on http://localhost:${PORT} [${PROD ? "PROD" : "LOCAL"}]`
+  );
 });
